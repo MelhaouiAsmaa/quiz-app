@@ -42,7 +42,11 @@ export default function QuestionsFilters() {
         </button>
       </form>
       {quizData && (
-        <Questions category={quizData.categoryId} difficulty={quizData.difficulty} />
+        <Questions
+          key={`${quizData.categoryId}-${quizData.difficulty}`} //for resetting the state
+          category={quizData.categoryId}
+          difficulty={quizData.difficulty}
+        />
       )}
     </>
   );

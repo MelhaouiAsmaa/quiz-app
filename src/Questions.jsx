@@ -43,7 +43,7 @@ export default function Questions({ category, difficulty }) {
   // If there's an error, display it
   if (error) return <p>Error: {error}</p>;
 
-  const handleAnswerClick = (question, answer) => {
+  const handleAnswerClick = (question, correctAnswer, answer) => {
     setSelectedAnswers((prev) => {
       const existingIndex = prev.findIndex(
         (item) => item.question === question
@@ -56,12 +56,12 @@ export default function Questions({ category, difficulty }) {
         );
       } else {
         // Add new question-answer pair
-        return [...prev, { question, answer }];
+        return [...prev, { question, correctAnswer, answer }];
       }
     });
   };
 
-  function handleSubmit(){
+  function handleSubmit() {
     setSubmitAnswers(true);
   }
 
@@ -75,16 +75,38 @@ export default function Questions({ category, difficulty }) {
             (answer) => (
               <button
                 className={`btn ${
-                  selectedAnswers.some(
-                    (item) =>
-                      item.question === choice.question &&
-                      item.answer === answer
-                  ) //what does some do
-                    ? "btn-success"
-                    : "btn-outline-success"
+                  submitAnswers
+                    ? selectedAnswers.some(
+                        (item) =>
+                          item.question === choice.question &&
+                          item.answer === answer &&
+                          item.correctAnswer !== item.answer
+                      )
+                      ? "btn-danger" // Wrong answer -> Red
+                      : selectedAnswers.some(
+                          (item) =>
+                            item.question === choice.question &&
+                            item.answer === answer &&
+                            item.correctAnswer === item.answer
+                        )
+                      ? "btn-success" // Correct answer -> Green
+                      : "btn-outline-success" // Not selected -> Green outline
+                    : selectedAnswers.some(
+                        (item) =>
+                          item.question === choice.question &&
+                          item.answer === answer
+                      )
+                    ? "btn-success" // Selected but not submitted -> Green
+                    : "btn-outline-success" // Default -> Green outline
                 }`}
                 key={answer}
-                onClick={() => handleAnswerClick(choice.question, answer)}
+                onClick={() =>
+                  handleAnswerClick(
+                    choice.question,
+                    choice.correct_answer,
+                    answer
+                  )
+                }
               >
                 {answer}
               </button>
@@ -93,11 +115,15 @@ export default function Questions({ category, difficulty }) {
         </React.Fragment>
       ))}
       {selectedAnswers.length === 5 && (
+        !submitAnswers ?
         <div>
-          <button className="btn btn-secondary" onClick={handleSubmit}>Submit</button>
+          <button className="btn btn-secondary" onClick={handleSubmit}>
+            Submit
+          </button>
         </div>
+        :
+        <Answers answer={selectedAnswers} />
       )}
-      {submitAnswers && <Answers answer={selectedAnswers} />}
     </>
   );
 }
